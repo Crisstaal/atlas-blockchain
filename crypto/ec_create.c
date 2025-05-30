@@ -10,19 +10,19 @@
  */
 EC_KEY *ec_create(void)
 {
-    EC_KEY *key = NULL;
+	EC_KEY *key = NULL;
 
-    /* Create a new EC_KEY object with curve secp256k1 */
-    key = EC_KEY_new_by_curve_name(EC_CURVE);
-    if (!key)
-        return (NULL);
+	/* Create a new EC_KEY object with curve secp256k1 */
+	key = EC_KEY_new_by_curve_name(EC_CURVE);
+	if (!key)
+		return (NULL);
 
-    /* Generate the key pair */
-    if (EC_KEY_generate_key(key) != 1)
-    {
-        EC_KEY_free(key);
-        return (NULL);
-    }
+	/* Generate the key pair */
+	if (EC_KEY_generate_key(key) != 1)
+	{
+		EC_KEY_free(key);
+		return (NULL);
+	}
 
-    return (key);
+	return (key);
 }

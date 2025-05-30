@@ -8,7 +8,6 @@
  * @msg: pointer to the message bytes to verify
  * @msglen: length of the message in bytes
  * @sig: pointer to the signature structure holding the signature data
- *
  * Return: 1 if the signature is valid, 0 otherwise
  */
 int ec_verify(EC_KEY const *key, uint8_t const *msg, size_t msglen, sig_t const *sig)
