@@ -8,6 +8,10 @@
 #include <openssl/obj_mac.h>
 #include <openssl/ecdsa.h>
 
+#define PRI_FILENAME "key.pem"
+#define PUB_FILENAME "key_pub.pem"
+
+
 /* Define the elliptic curve to use */
 #define EC_CURVE NID_secp256k1
 
