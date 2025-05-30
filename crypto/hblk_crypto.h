@@ -14,7 +14,13 @@
 /* Length of the public key in uncompressed form */
 #define EC_PUB_LEN 65
 
-/* Signature structure */
+/**
+ * struct sig_s - Represents a digital signature
+ * @sig: Pointer
+ * @len: Length
+ *
+ * This structure is used to store a digital signature and its length.
+ */
 typedef struct sig_s
 {
 	uint8_t *sig;
