@@ -22,9 +22,11 @@ int ec_save(EC_KEY *key, char const *folder)
 		return (0);
 
 	/* Prepare file paths */
-	if (snprintf(priv_path, sizeof(priv_path), "%s/%s", folder, "key.pem") >= (int)sizeof(priv_path))
+	if (snprintf(priv_path, sizeof(priv_path),
+	"%s/%s", folder, "key.pem") >= (int)sizeof(priv_path))
 		return (0);
-	if (snprintf(pub_path, sizeof(pub_path), "%s/%s", folder, "key_pub.pem") >= (int)sizeof(pub_path))
+	if (snprintf(pub_path, sizeof(pub_path),
+	"%s/%s", folder, "key_pub.pem") >= (int)sizeof(pub_path))
 		return (0);
 
 	/* Save private key */
