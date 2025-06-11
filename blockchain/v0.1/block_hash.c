@@ -31,7 +31,7 @@ uint8_t *block_hash(block_t const *block, uint8_t hash_buf[SHA256_DIGEST_LENGTH]
 	memcpy(to_hash + sizeof(block->info), block->data.buffer, block->data.len);
 
 	/* Compute SHA256 hash */
-	sha256(to_hash, to_hash_size, hash_buf);
+	sha256((int8_t const *)to_hash, to_hash_size, hash_buf);
 
 	free(to_hash);
 	return (hash_buf);
