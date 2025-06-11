@@ -27,7 +27,7 @@ static const block_t genesis_block = {
 /**
  * block_is_valid - Checks if a given block is valid in the blockchain
  * @block: Pointer to the block to validate
- * @prev_block: Pointer to the previous block in the blockchain, or NULL if @block is the genesis block
+ * @prev_block: Pointer to the previous block
  *
  * Return: 0 if the block is valid, 1 otherwise
  **/
