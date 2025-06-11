@@ -3,6 +3,8 @@
 #include <string.h>
 #include "blockchain.h"
 #include "llist.h"
+#include "endianness.h"
+#define HBLK_VERSION "0.1"
 
 
 /**
