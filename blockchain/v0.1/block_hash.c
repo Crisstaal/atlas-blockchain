@@ -10,7 +10,8 @@
  *
  * Return: Pointer to hash_buf on success, or NULL on failure
  */
-uint8_t *block_hash(block_t const *block, uint8_t hash_buf[SHA256_DIGEST_LENGTH])
+uint8_t *block_hash(block_t const *block,
+	uint8_t hash_buf[SHA256_DIGEST_LENGTH])
 {
 	size_t to_hash_size;
 	uint8_t *to_hash;
