@@ -1,101 +1,134 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
 #include "blockchain.h"
 
-#define MAGIC "HBLK0.1"
-#define MAGIC_LEN 7
-
-block_t *block_deserialize(FILE *fd);  
-
 /**
- * read_uint32 - Read a 4-byte little-endian unsigned integer from a file
- * @fd: File pointer
- * @out: Pointer to uint32_t to store the value
+ * read_block_from_file - Helper to read a block from file into a new block_t
+ * @fd: opened file pointer
  *
- * Return: 0 on success, -1 on failure
+ * Return: pointer to new block_t or NULL on failure
  */
-static int read_uint32(FILE *fd, uint32_t *out)
+static block_t *read_block_from_file(FILE *fd)
 {
-    unsigned char buf[4];
+    block_t *block = malloc(sizeof(block_t));
+    if (!block)
+        return NULL;
 
-    if (fread(buf, 1, 4, fd) != 4)
-        return (-1);
+    /* Read block_info */
+    if (fread(&block->info, sizeof(block_info_t), 1, fd) != 1)
+    {
+        free(block);
+        return NULL;
+    }
 
-    *out = (uint32_t)buf[0] |
-           ((uint32_t)buf[1] << 8) |
-           ((uint32_t)buf[2] << 16) |
-           ((uint32_t)buf[3] << 24);
+    /* Read block_data */
+    if (fread(&block->data.len, sizeof(block->data.len), 1, fd) != 1)
+    {
+        free(block);
+        return NULL;
+    }
 
-    return (0);
+    if (block->data.len > BLOCKCHAIN_DATA_MAX)
+    {
+        /* Data length too large, invalid */
+        free(block);
+        return NULL;
+    }
+
+    if (fread(block->data.buffer, sizeof(int8_t), block->data.len, fd) != block->data.len)
+    {
+        free(block);
+        return NULL;
+    }
+
+    /* Read block hash */
+    if (fread(block->hash, 1, SHA256_DIGEST_LENGTH, fd) != SHA256_DIGEST_LENGTH)
+    {
+        free(block);
+        return NULL;
+    }
+
+    return block;
 }
 
-
-
 /**
- * blockchain_deserialize - Deserialize a Blockchain from a file
- * @path: Path to the binary file
+ * blockchain_deserialize - Deserialize blockchain from file
+ * @path: path to binary file
  *
- * Return: Pointer to deserialized blockchain, or NULL on failure
+ * Return: pointer to blockchain_t or NULL on failure
  */
 blockchain_t *blockchain_deserialize(char const *path)
 {
-    FILE *fd;
-    blockchain_t *blockchain;
-    block_t *block;
-    char magic[MAGIC_LEN];
+    FILE *fd = NULL;
+    uint8_t magic[7];
     uint8_t version;
-    uint32_t blocks_count, i;
+    uint32_t blocks_count;
+    blockchain_t *blockchain = NULL;
+    block_t *block = NULL;
     int ret;
+    uint32_t i;
 
     if (!path)
-        return (NULL);
+        return NULL;
 
     fd = fopen(path, "rb");
     if (!fd)
-        return (NULL);
+        return NULL;
 
-    if (fread(magic, 1, MAGIC_LEN, fd) != MAGIC_LEN)
-        goto fail;
+    /* Check magic */
+    ret = fread(magic, sizeof(magic), 1, fd);
+    if (ret != 1 || memcmp(magic, "HBLK0.1", sizeof(magic)) != 0)
+    {
+        fclose(fd);
+        return NULL;
+    }
 
-    if (memcmp(magic, MAGIC, MAGIC_LEN) != 0)
-        goto fail;
+    /* Check version */
+    ret = fread(&version, sizeof(version), 1, fd);
+    if (ret != 1 || version != 1)
+    {
+        fclose(fd);
+        return NULL;
+    }
 
-    if (fread(&version, 1, 1, fd) != 1)
-        goto fail;
+    /* Read blocks count */
+    ret = fread(&blocks_count, sizeof(blocks_count), 1, fd);
+    if (ret != 1)
+    {
+        fclose(fd);
+        return NULL;
+    }
 
-    if (version != 1)
-        goto fail;
-
+    /* Create blockchain */
     blockchain = blockchain_create();
     if (!blockchain)
-        goto fail;
+    {
+        fclose(fd);
+        return NULL;
+    }
 
-    ret = read_uint32(fd, &blocks_count);
-    if (ret == -1)
-        goto fail;
-
+    /* Deserialize blocks */
     for (i = 0; i < blocks_count; i++)
     {
-        block = block_deserialize(fd);
+        block = read_block_from_file(fd);
         if (!block)
-            goto fail;
+        {
+            blockchain_destroy(blockchain);
+            fclose(fd);
+            return NULL;
+        }
 
-        if (llist_add_node(blockchain->chain, block, ADD_NODE_REAR) == -1)
+        /* Add block to blockchain->chain linked list */
+        if (llist_add_node(blockchain->chain, block, ADD_NODE_REAR) == NULL)
         {
             block_destroy(block);
-            goto fail;
+            blockchain_destroy(blockchain);
+            fclose(fd);
+            return NULL;
         }
     }
 
     fclose(fd);
-    return (blockchain);
-
-fail:
-    if (blockchain)
-        blockchain_destroy(blockchain);
-    if (fd)
-        fclose(fd);
-    return (NULL);
+    return blockchain;
 }
