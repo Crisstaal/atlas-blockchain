@@ -3,7 +3,7 @@
 #include <string.h>
 #include "blockchain.h"
 #include "llist.h"
-#include "_endianness.h"
+
 
 /**
  * swap_endian - Swap endianness of bytes in place
