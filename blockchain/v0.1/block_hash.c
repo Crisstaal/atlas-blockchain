@@ -4,21 +4,33 @@
 /**
  * block_hash - Computes the hash of a block
  * @block: Pointer to the block to hash
- * @hash_buf: Buffer to store the hash (must be SHA256_DIGEST_LENGTH in size)
- * Return: Pointer to hash_buf or NULL on failure
+ * @hash_buf: Buffer where the hash will be stored (SHA256_DIGEST_LENGTH)
+ *
+ * Return: Pointer to hash_buf on success, or NULL on failure
  */
 uint8_t *block_hash(block_t const *block, uint8_t hash_buf[SHA256_DIGEST_LENGTH])
 {
-	size_t len;
+	size_t to_hash_size;
+	uint8_t *to_hash;
 
 	if (!block || !hash_buf)
 		return (NULL);
 
-	/* Total length = info + data.buffer (up to data.len) */
-	len = sizeof(block->info) + block->data.len;
+	/* Size = block_info_t + block_data_t.buffer (len only) */
+	to_hash_size = sizeof(block->info) + block->data.len;
 
-	/* Hash the concatenated info + data */
-	sha256((int8_t const *)block, len, hash_buf);
+	to_hash = malloc(to_hash_size);
+	if (!to_hash)
+		return (NULL);
 
+	/* Copy info */
+	memcpy(to_hash, &block->info, sizeof(block->info));
+	/* Copy data buffer (only used length) */
+	memcpy(to_hash + sizeof(block->info), block->data.buffer, block->data.len);
+
+	/* Compute SHA256 hash */
+	sha256(to_hash, to_hash_size, hash_buf);
+
+	free(to_hash);
 	return (hash_buf);
 }
