@@ -23,6 +23,15 @@ static const block_t genesis_block = {
 	0xd3, 0xd7, 0xff, 0x2f, 0x04,
 	0x51, 0x58, 0x03}};
 
+
+/**
+ * block_is_valid - Checks if a given block is valid in the blockchain
+ * @block: Pointer to the block to validate
+ * @prev_block: Pointer to the previous block in the blockchain, or NULL if @block is the genesis block
+ *
+ * Return: 0 if the block is valid, 1 otherwise
+ **/
+
 int block_is_valid(block_t const *block, block_t const *prev_block)
 {
 	uint8_t hash[SHA256_DIGEST_LENGTH] = {0};
