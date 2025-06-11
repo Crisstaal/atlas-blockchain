@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include "blockchain.h"
 
 #define MAGIC "HBLK0.1"
@@ -62,6 +63,7 @@ static int read_bytes(FILE *fd, void *buf, size_t n)
 {
 	if (fread(buf, 1, n, fd) != n)
 		return (-1);
+
 	return (0);
 }
 
@@ -73,9 +75,9 @@ static int read_bytes(FILE *fd, void *buf, size_t n)
  */
 blockchain_t *blockchain_deserialize(char const *path)
 {
-	FILE *fd = NULL;
-	blockchain_t *blockchain = NULL;
-	block_t *block = NULL;
+	FILE *fd;
+	blockchain_t *blockchain;
+	block_t *block;
 	char magic[MAGIC_LEN];
 	uint8_t version;
 	uint32_t blocks_count, i;
@@ -88,24 +90,22 @@ blockchain_t *blockchain_deserialize(char const *path)
 	if (!fd)
 		return (NULL);
 
-	/* Read and validate magic */
 	if (fread(magic, 1, MAGIC_LEN, fd) != MAGIC_LEN)
 		goto fail;
+
 	if (memcmp(magic, MAGIC, MAGIC_LEN) != 0)
 		goto fail;
 
-	/* Read and validate version */
 	if (fread(&version, 1, 1, fd) != 1)
 		goto fail;
+
 	if (version != 1)
 		goto fail;
 
-	/* Create empty blockchain */
 	blockchain = blockchain_create();
 	if (!blockchain)
 		goto fail;
 
-	/* Read blocks count */
 	ret = read_uint32(fd, &blocks_count);
 	if (ret == -1)
 		goto fail;
