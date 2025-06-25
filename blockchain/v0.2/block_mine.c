@@ -5,7 +5,6 @@
  * @block: Pointer to the block to be mined
  *
  * Description: Increment nonce until a hash matches the difficulty.
- * Timestamp stays fixed to block's original timestamp to ensure consistent mining.
  */
 void block_mine(block_t *block)
 {
@@ -17,8 +16,7 @@ void block_mine(block_t *block)
 	ts = block->info.timestamp; /* Save initial timestamp */
 	block->info.nonce = 0;
 
-	do
-	{
+	do{
 		block->info.nonce++;
 		block->info.timestamp = ts; /* Keep timestamp fixed during mining */
 		block_hash(block, block->hash);
