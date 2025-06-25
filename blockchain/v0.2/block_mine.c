@@ -4,8 +4,8 @@
  * block_mine - Mines a block by finding a valid hash
  * @block: Pointer to the block to be mined
  *
- * Description: Increments nonce until a hash is found that
- * matches the block's difficulty.
+ * Description: Increment nonce and update timestamp until
+ * a hash is found that matches the block's difficulty.
  */
 void block_mine(block_t *block)
 {
@@ -14,10 +14,16 @@ void block_mine(block_t *block)
 
 	block->info.nonce = 0;
 
-	do
+	while (1)
 	{
 		block->info.timestamp = (uint64_t)time(NULL);
-		block_hash(block, block->hash);
+
+		if (!block_hash(block, block->hash))
+			return; /* Hashing failed, exit early */
+
+		if (hash_matches_difficulty(block->hash, block->info.difficulty))
+			break; /* Found a valid hash */
+
 		block->info.nonce++;
-	} while (!hash_matches_difficulty(block->hash, block->info.difficulty));
+	}
 }
