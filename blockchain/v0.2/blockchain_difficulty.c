@@ -9,7 +9,7 @@
 uint32_t blockchain_difficulty(blockchain_t const *blockchain)
 {
 	block_t *last_block, *adjustment_block;
-	uint32_t blockchain_size;
+	int blockchain_size;
 	time_t actual_time, expected_time;
 	uint32_t difficulty;
 
