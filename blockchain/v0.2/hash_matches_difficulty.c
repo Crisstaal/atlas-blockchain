@@ -17,7 +17,8 @@ int hash_matches_difficulty(uint8_t const hash[SHA256_DIGEST_LENGTH],
 	{
 		byte = hash[i];
 
-		for (int bit = 7; bit >= 0 && bits_checked < difficulty; bit--, bits_checked++)
+		for (int bit = 7; bit >= 0 &&
+			bits_checked < difficulty; bit--, bits_checked++)
 		{
 			if ((byte >> bit) & 1)
 				return (0);
