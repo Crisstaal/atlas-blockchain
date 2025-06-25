@@ -9,17 +9,18 @@
  */
 void block_mine(block_t *block)
 {
-    uint64_t ts;
+	uint64_t ts;
 
-    if (!block)
-        return;
+	if (!block)
+		return;
 
-    ts = block->info.timestamp;  /* Save initial timestamp */
-    block->info.nonce = 0;
+	ts = block->info.timestamp; /* Save initial timestamp */
+	block->info.nonce = 0;
 
-    do {
-        block->info.nonce++;
-        block->info.timestamp = ts;  /* Keep timestamp fixed during mining */
-        block_hash(block, block->hash);
-    } while (!hash_matches_difficulty(block->hash, block->info.difficulty));
+	do
+	{
+		block->info.nonce++;
+		block->info.timestamp = ts; /* Keep timestamp fixed during mining */
+		block_hash(block, block->hash);
+	} while (!hash_matches_difficulty(block->hash, block->info.difficulty));
 }
