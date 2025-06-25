@@ -16,7 +16,7 @@ void block_mine(block_t *block)
 	ts = block->info.timestamp; /* Save initial timestamp */
 	block->info.nonce = 0;
 
-	do{
+	do {
 		block->info.nonce++;
 		block->info.timestamp = ts; /* Keep timestamp fixed during mining */
 		block_hash(block, block->hash);
