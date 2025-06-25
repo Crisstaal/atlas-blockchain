@@ -9,21 +9,14 @@
  */
 void block_mine(block_t *block)
 {
-	if (!block)
-		return;
+    if (!block)
+        return;
 
-	block->info.nonce = 0;
+    block->info.nonce = 0;
 
-	while (1)
-	{
-		block->info.timestamp = (uint64_t)time(NULL);
-
-		if (!block_hash(block, block->hash))
-			return; /* Hashing failed, exit early */
-
-		if (hash_matches_difficulty(block->hash, block->info.difficulty))
-			break; /* Found a valid hash */
-
-		block->info.nonce++;
-	}
+    do {
+        block->info.nonce++;
+        block->info.timestamp = (uint64_t)time(NULL);
+        block_hash(block, block->hash);
+    } while (!hash_matches_difficulty(block->hash, block->info.difficulty));
 }
