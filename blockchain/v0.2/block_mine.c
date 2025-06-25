@@ -14,7 +14,8 @@ void block_mine(block_t *block)
 
 	block->info.nonce = 0;
 
-	do {
+	do
+	{
 		block->info.timestamp = (uint64_t)time(NULL);
 		block_hash(block, block->hash);
 		block->info.nonce++;
