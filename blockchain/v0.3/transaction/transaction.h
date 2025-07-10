@@ -1,7 +1,7 @@
 #ifndef TRANSACTION_H
 #define TRANSACTION_H
 
-#include "crypto/hblk_crypto.h"
+#include "crypto/hblk_crypto.h" /* defines sig_t, EC_PUB_LEN, SHA256_DIGEST_LENGTH */
 
 #include "blockchain.h"
 #include <stddef.h>
@@ -12,8 +12,6 @@
 #include "llist.h"
 
 #define COINBASE_AMOUNT 50
-#define SHA256_DIGEST_LENGTH 32
-#define EC_PUB_LEN 65
 
 typedef struct blockchain_s blockchain_t;
 
@@ -75,12 +73,12 @@ typedef struct transaction_s
     llist_t *outputs;
 } transaction_t;
 
-/* Function prototypes - declare each function only once */
+/* Function prototypes */
 
 unspent_tx_out_t *unspent_tx_out_create(
-	uint8_t block_hash[SHA256_DIGEST_LENGTH],
-	uint8_t tx_id[SHA256_DIGEST_LENGTH],
-	tx_out_t const *out);
+    uint8_t block_hash[SHA256_DIGEST_LENGTH],
+    uint8_t tx_id[SHA256_DIGEST_LENGTH],
+    tx_out_t const *out);
 
 int blockchain_serialize(blockchain_t const *blockchain, char const *path);
 blockchain_t *blockchain_deserialize(char const *path);
