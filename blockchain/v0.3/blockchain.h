@@ -35,6 +35,7 @@ typedef struct block_data_s
     uint32_t len;
 } block_data_t;
 
+
 /**
  * struct tx_in_s - Transaction input structure
  *
