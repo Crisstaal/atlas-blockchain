@@ -1,6 +1,7 @@
 #ifndef HBLK_TRANSACTION_H
 #define HBLK_TRANSACTION_H
 
+#include "blockchain.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <openssl/ec.h>
