@@ -59,6 +59,11 @@ typedef struct transaction_s
     llist_t *outputs;
 } transaction_t;
 
+unspent_tx_out_t *unspent_tx_out_create(
+	uint8_t block_hash[SHA256_DIGEST_LENGTH],
+	uint8_t tx_id[SHA256_DIGEST_LENGTH],
+	tx_out_t const *out);
+    
 /**
  * struct unspent_tx_out_s - Unspent transaction output
  *
@@ -72,6 +77,19 @@ typedef struct unspent_tx_out_s
     uint8_t tx_id[SHA256_DIGEST_LENGTH];
     tx_out_t out;
 } unspent_tx_out_t;
+
+/**
+ * unspent_tx_out_create - Creates an unspent transaction output
+ * @block_hash: Hash of the block where the transaction was found
+ * @tx_id: Hash of the transaction that created the output
+ * @out: Pointer to the referenced transaction output
+ *
+ * Return: Pointer to the new unspent_tx_out_t, or NULL on failure
+ */
+unspent_tx_out_t *unspent_tx_out_create(
+	uint8_t block_hash[SHA256_DIGEST_LENGTH],
+	uint8_t tx_id[SHA256_DIGEST_LENGTH],
+	tx_out_t const *out);
 
 int blockchain_serialize(blockchain_t const *blockchain, char const *path);
 blockchain_t *blockchain_deserialize(char const *path);
