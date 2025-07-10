@@ -1,5 +1,5 @@
-#ifndef HBLK_TRANSACTION_H
-#define HBLK_TRANSACTION_H
+#ifndef TRANSACTION_H
+#define TRANSACTION_H
 
 #include "blockchain.h"
 #include <stddef.h>
@@ -7,13 +7,11 @@
 #include <openssl/ec.h>
 #include <openssl/sha.h>
 
-#include "crypto/hblk_crypto.h" /* for EC_PUB_LEN, etc. */
 #include "llist.h"
 
 #define COINBASE_AMOUNT 50
 
 typedef struct blockchain_s blockchain_t;
-
 
 /**
  * struct tx_in_s - Transaction input structure
@@ -46,25 +44,6 @@ typedef struct tx_out_s
 } tx_out_t;
 
 /**
- * struct transaction_s - Full transaction structure
- *
- * @id: Hash of this transaction
- * @inputs: List of inputs (tx_in_t *)
- * @outputs: List of outputs (tx_out_t *)
- */
-typedef struct transaction_s
-{
-    uint8_t id[SHA256_DIGEST_LENGTH];
-    llist_t *inputs;
-    llist_t *outputs;
-} transaction_t;
-
-unspent_tx_out_t *unspent_tx_out_create(
-	uint8_t block_hash[SHA256_DIGEST_LENGTH],
-	uint8_t tx_id[SHA256_DIGEST_LENGTH],
-	tx_out_t const *out);
-    
-/**
  * struct unspent_tx_out_s - Unspent transaction output
  *
  * @block_hash: Hash of the block containing the transaction
@@ -79,13 +58,21 @@ typedef struct unspent_tx_out_s
 } unspent_tx_out_t;
 
 /**
- * unspent_tx_out_create - Creates an unspent transaction output
- * @block_hash: Hash of the block where the transaction was found
- * @tx_id: Hash of the transaction that created the output
- * @out: Pointer to the referenced transaction output
+ * struct transaction_s - Full transaction structure
  *
- * Return: Pointer to the new unspent_tx_out_t, or NULL on failure
+ * @id: Hash of this transaction
+ * @inputs: List of inputs (tx_in_t *)
+ * @outputs: List of outputs (tx_out_t *)
  */
+typedef struct transaction_s
+{
+    uint8_t id[SHA256_DIGEST_LENGTH];
+    llist_t *inputs;
+    llist_t *outputs;
+} transaction_t;
+
+/* Function prototypes - declare each function only once */
+
 unspent_tx_out_t *unspent_tx_out_create(
 	uint8_t block_hash[SHA256_DIGEST_LENGTH],
 	uint8_t tx_id[SHA256_DIGEST_LENGTH],
@@ -94,9 +81,7 @@ unspent_tx_out_t *unspent_tx_out_create(
 int blockchain_serialize(blockchain_t const *blockchain, char const *path);
 blockchain_t *blockchain_deserialize(char const *path);
 
-/* Function Prototypes */
 tx_out_t *tx_out_create(uint32_t amount, uint8_t const pub[EC_PUB_LEN]);
-unspent_tx_out_t *unspent_tx_out_create(uint8_t block_hash[SHA256_DIGEST_LENGTH], uint8_t tx_id[SHA256_DIGEST_LENGTH], tx_out_t const *out);
 tx_in_t *tx_in_create(unspent_tx_out_t const *unspent);
 uint8_t *transaction_hash(transaction_t const *transaction, uint8_t hash_buf[SHA256_DIGEST_LENGTH]);
 sig_t *tx_in_sign(tx_in_t *in, uint8_t const tx_id[SHA256_DIGEST_LENGTH], EC_KEY const *sender, llist_t *all_unspent);
@@ -106,9 +91,6 @@ transaction_t *coinbase_create(EC_KEY const *receiver, uint32_t block_index);
 int coinbase_is_valid(transaction_t const *coinbase, uint32_t block_index);
 void transaction_destroy(transaction_t *transaction);
 
-/* Remove or do NOT declare block_is_valid here to avoid conflicts! */
-
 llist_t *update_unspent(llist_t *transactions, uint8_t block_hash[SHA256_DIGEST_LENGTH], llist_t *all_unspent);
 
-
-#endif /* HBLK_TRANSACTION_H */
+#endif /* TRANSACTION_H */
