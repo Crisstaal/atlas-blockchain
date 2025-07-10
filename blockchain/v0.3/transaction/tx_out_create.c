@@ -1,32 +1,35 @@
 #include <stdlib.h>
 #include <string.h>
 #include "transaction.h"
+#include "crypto/hblk_crypto.h"
 
 /**
- * unspent_tx_out_create - creates an unspent transaction output
- * @block_hash: hash of the Block where the transaction output is located
- * @tx_id: ID (hash) of the transaction
- * @out: pointer to the referenced transaction output
+ * tx_out_create - Creates and initializes a new transaction output
+ * @amount: Amount of coins to transfer
+ * @pub: Receiver’s public key
  *
- * Return: pointer to a newly allocated unspent_tx_out_t, or NULL on failure
+ * Return: Pointer to the created tx_out_t, or NULL on failure
  */
-unspent_tx_out_t *unspent_tx_out_create(
-	uint8_t block_hash[SHA256_DIGEST_LENGTH],
-	uint8_t tx_id[SHA256_DIGEST_LENGTH],
-	tx_out_t const *out)
+tx_out_t *tx_out_create(uint32_t amount, uint8_t const pub[EC_PUB_LEN])
 {
-	unspent_tx_out_t *unspent;
+	tx_out_t *out;
 
-	if (!block_hash || !tx_id || !out)
+	if (!pub)
 		return (NULL);
 
-	unspent = malloc(sizeof(unspent_tx_out_t));
-	if (!unspent)
+	out = calloc(1, sizeof(tx_out_t));
+	if (!out)
 		return (NULL);
 
-	memcpy(unspent->block_hash, block_hash, SHA256_DIGEST_LENGTH);
-	memcpy(unspent->tx_id, tx_id, SHA256_DIGEST_LENGTH);
-	memcpy(&unspent->out, out, sizeof(tx_out_t));
+	out->amount = amount;
+	memcpy(out->pub, pub, EC_PUB_LEN);
 
-	return (unspent);
+	/* Hash the amount + pub key to produce output hash */
+	if (!sha256((int8_t const *)out, sizeof(out->amount) + EC_PUB_LEN, out->hash))
+	{
+		free(out);
+		return (NULL);
+	}
+
+	return (out);
 }
