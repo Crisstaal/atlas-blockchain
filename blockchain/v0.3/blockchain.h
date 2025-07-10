@@ -35,6 +35,29 @@ typedef struct block_data_s
     uint32_t len;
 } block_data_t;
 
+/**
+ * struct tx_in_s - Transaction input structure
+ *
+ * @block_hash: Hash of the block containing the referenced output
+ * @tx_id: Hash of the transaction containing the referenced output
+ * @tx_out_hash: Hash of the output within the transaction
+ * @sig: Signature that unlocks the referenced output
+ */
+typedef struct tx_in_s
+{
+    uint8_t block_hash[SHA256_DIGEST_LENGTH];
+    uint8_t tx_id[SHA256_DIGEST_LENGTH];
+    uint8_t tx_out_hash[SHA256_DIGEST_LENGTH];
+    sig_t sig;
+} tx_in_t;
+
+/**
+ * struct tx_out_s - Transaction output structure
+ *
+ * @amount: Amount of coins to transfer
+ * @pub: Receiver’s public key
+ * @hash: Hash of this output
+ */
 typedef struct tx_out_s
 {
     uint32_t amount;
@@ -42,12 +65,20 @@ typedef struct tx_out_s
     uint8_t hash[SHA256_DIGEST_LENGTH];
 } tx_out_t;
 
+/**
+ * struct unspent_tx_out_s - Unspent transaction output
+ *
+ * @block_hash: Hash of the block containing the transaction
+ * @tx_id: Hash of the transaction
+ * @out: Copy of the transaction output
+ */
 typedef struct unspent_tx_out_s
 {
     uint8_t block_hash[SHA256_DIGEST_LENGTH];
     uint8_t tx_id[SHA256_DIGEST_LENGTH];
     tx_out_t out;
 } unspent_tx_out_t;
+
 
 typedef struct block_s
 {
