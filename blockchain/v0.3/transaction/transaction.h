@@ -11,6 +11,8 @@
 #include "../../llist.h"              /* for llist_t */
 
 #define COINBASE_AMOUNT 50
+typedef struct blockchain_s blockchain_t;
+
 
 /**
  * struct tx_in_s - Transaction input structure
@@ -70,6 +72,9 @@ typedef struct unspent_tx_out_s
     tx_out_t out;
 } unspent_tx_out_t;
 
+int blockchain_serialize(blockchain_t const *blockchain, char const *path);
+blockchain_t *blockchain_deserialize(char const *path);
+
 /* Function Prototypes */
 tx_out_t *tx_out_create(uint32_t amount, uint8_t const pub[EC_PUB_LEN]);
 unspent_tx_out_t *unspent_tx_out_create(uint8_t block_hash[SHA256_DIGEST_LENGTH], uint8_t tx_id[SHA256_DIGEST_LENGTH], tx_out_t const *out);
@@ -85,7 +90,6 @@ void transaction_destroy(transaction_t *transaction);
 /* Remove or do NOT declare block_is_valid here to avoid conflicts! */
 
 llist_t *update_unspent(llist_t *transactions, uint8_t block_hash[SHA256_DIGEST_LENGTH], llist_t *all_unspent);
-int blockchain_serialize(blockchain_t const *blockchain, char const *path);
-blockchain_t *blockchain_deserialize(char const *path);
+
 
 #endif /* HBLK_TRANSACTION_H */

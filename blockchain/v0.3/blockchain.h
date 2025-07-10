@@ -7,7 +7,7 @@
 #include <openssl/sha.h>
 
 #include "llist.h"
-#include "transaction.h"   /* Include transaction.h for transaction_t, block_is_valid */
+#include "transaction.h"
 
 /* Macros */
 #define BLOCKCHAIN_DATA_MAX 1024
