@@ -12,6 +12,8 @@
 #include "llist.h"
 
 #define COINBASE_AMOUNT 50
+#define SHA256_DIGEST_LENGTH 32
+#define EC_PUB_LEN 65
 
 typedef struct blockchain_s blockchain_t;
 
