@@ -3,7 +3,8 @@
 #include "transaction.h"
 
 /**
- * unspent_tx_out_create - Creates and initializes an unspent transaction output
+ * unspent_tx_out_create - Creates and initializes an unspent
+ * transaction output
  * @block_hash: Hash of the block where the output is stored
  * @tx_id: ID (hash) of the transaction
  * @out: Pointer to the referenced transaction output

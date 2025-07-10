@@ -4,7 +4,8 @@
 #include "crypto/hblk_crypto.h"
 
 /**
- * tx_out_create - Creates and initializes a new transaction output
+ * tx_out_create - Creates and initializes a new
+ * transaction output
  * @amount: Amount of coins to transfer
  * @pub: Receiver’s public key
  *
