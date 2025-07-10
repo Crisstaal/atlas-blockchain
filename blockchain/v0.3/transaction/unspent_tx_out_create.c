@@ -1,6 +1,6 @@
 #include "transaction.h"
 #include "crypto/hblk_crypto.h" /* For SHA256_DIGEST_LENGTH */
-
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 

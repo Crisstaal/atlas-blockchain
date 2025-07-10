@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <time.h>
 #include <openssl/sha.h>
+#include "crypto/hblk_crypto.h"
 
 #include "llist.h"
 

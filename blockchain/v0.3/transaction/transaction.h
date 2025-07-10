@@ -1,7 +1,7 @@
 #ifndef TRANSACTION_H
 #define TRANSACTION_H
 
-#include "crypto/hblk_crypto.h" /* defines sig_t, EC_PUB_LEN, SHA256_DIGEST_LENGTH */
+#include "crypto/hblk_crypto.h" 
 
 #include "blockchain.h"
 #include <stddef.h>
