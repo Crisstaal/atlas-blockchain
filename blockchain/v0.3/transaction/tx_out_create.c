@@ -1,4 +1,6 @@
 #include "transaction.h"
+#include "blockchain.h"
+#include "llist.h"
 #include <string.h>
 
 /**

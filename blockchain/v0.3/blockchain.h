@@ -7,12 +7,15 @@
 #include <openssl/sha.h>
 
 #include "llist.h"
-#include "transaction.h"
+
 
 /* Macros */
 #define BLOCKCHAIN_DATA_MAX 1024
 #define BLOCK_GENERATION_INTERVAL 1
 #define DIFFICULTY_ADJUSTMENT_INTERVAL 5
+
+typedef struct transaction_s transaction_t;
+
 
 /* === Structures === */
 
@@ -36,7 +39,7 @@ typedef struct block_s
     block_info_t info;
     block_data_t data;
     uint8_t hash[SHA256_DIGEST_LENGTH];
-   transaction_t *transactions;
+    llist_t *transactions;
 } block_t;
 
 typedef struct blockchain_s

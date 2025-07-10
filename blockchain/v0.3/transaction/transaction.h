@@ -7,10 +7,11 @@
 #include <openssl/ec.h>
 #include <openssl/sha.h>
 
-#include "../../crypto/hblk_crypto.h" /* for EC_PUB_LEN, etc. */
-#include "../../llist.h"              /* for llist_t */
+#include "crypto/hblk_crypto.h" /* for EC_PUB_LEN, etc. */
+#include "llist.h"
 
 #define COINBASE_AMOUNT 50
+
 typedef struct blockchain_s blockchain_t;
 
 

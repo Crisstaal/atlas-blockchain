@@ -1,4 +1,5 @@
 #include "transaction.h"
+
 #include <string.h>
 
 /**
