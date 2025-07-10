@@ -38,7 +38,6 @@ typedef struct block_s
 {
     block_info_t info;
     block_data_t data;
-    uint8_t hash[SHA256_DIGEST_LENGTH];
     llist_t *transactions;
 } block_t;
 
