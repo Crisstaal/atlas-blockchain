@@ -6,17 +6,17 @@
 #include <time.h>
 #include <openssl/sha.h>
 #include "crypto/hblk_crypto.h"
-
 #include "llist.h"
-
 
 /* Macros */
 #define BLOCKCHAIN_DATA_MAX 1024
 #define BLOCK_GENERATION_INTERVAL 1
 #define DIFFICULTY_ADJUSTMENT_INTERVAL 5
+#define EC_PUB_LEN 65
+#define COINBASE_AMOUNT 50
 
+/* Forward declare transaction_t */
 typedef struct transaction_s transaction_t;
-
 
 /* === Structures === */
 
@@ -35,50 +35,63 @@ typedef struct block_data_s
     uint32_t len;
 } block_data_t;
 
+typedef struct tx_out_s
+{
+    uint32_t amount;
+    uint8_t pub[EC_PUB_LEN];
+    uint8_t hash[SHA256_DIGEST_LENGTH];
+} tx_out_t;
+
+typedef struct unspent_tx_out_s
+{
+    uint8_t block_hash[SHA256_DIGEST_LENGTH];
+    uint8_t tx_id[SHA256_DIGEST_LENGTH];
+    tx_out_t out;
+} unspent_tx_out_t;
+
 typedef struct block_s
 {
     block_info_t info;
     block_data_t data;
-    llist_t *transactions;
+    llist_t *transactions;  /* list of transaction_t * */
     uint8_t hash[SHA256_DIGEST_LENGTH];
 } block_t;
 
 typedef struct blockchain_s
 {
-    llist_t *chain;      // List of block_t *
-    llist_t *unspent;    // List of unspent_tx_out_t * — **Add this**
+    llist_t *chain;    /* List of block_t * */
+    llist_t *unspent;  /* List of unspent_tx_out_t * */
 } blockchain_t;
 
-/* blockchain_create.c */
+/* === Blockchain functions === */
+
 blockchain_t *blockchain_create(void);
-
-/* blockchain_destroy.c */
 void blockchain_destroy(blockchain_t *blockchain);
-
-/* blockchain_serialize.c */
 int blockchain_serialize(blockchain_t const *blockchain, char const *path);
-
-/* blockchain_deserialize.c */
 blockchain_t *blockchain_deserialize(char const *path);
-
 uint32_t blockchain_difficulty(blockchain_t const *blockchain);
 
 block_t *block_create(block_t const *prev,
                       int8_t const *data, uint32_t data_len);
-
 void block_destroy(block_t *block);
-
 uint8_t *block_hash(block_t const *block,
                     uint8_t hash_buf[SHA256_DIGEST_LENGTH]);
-
 int hash_matches_difficulty(uint8_t const hash[SHA256_DIGEST_LENGTH],
                             uint32_t difficulty);
-
 void block_mine(block_t *block);
-
-/* Add the missing block validation prototype here so no conflicts */
 int block_is_valid(block_t const *block,
                    block_t const *prev_block,
                    llist_t *all_unspent);
+
+/* === Transaction functions === */
+
+unspent_tx_out_t *unspent_tx_out_create(
+    uint8_t block_hash[SHA256_DIGEST_LENGTH],
+    uint8_t tx_id[SHA256_DIGEST_LENGTH],
+    tx_out_t const *out);
+
+tx_out_t *tx_out_create(uint32_t amount, uint8_t const pub[EC_PUB_LEN]);
+
+/* Add more transaction-related prototypes as needed */
 
 #endif /* BLOCKCHAIN_H */

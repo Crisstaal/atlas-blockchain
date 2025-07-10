@@ -11,6 +11,7 @@
 
 #include "llist.h"
 
+#define EC_PUB_LEN 65   
 #define COINBASE_AMOUNT 50
 
 typedef struct blockchain_s blockchain_t;
@@ -73,7 +74,6 @@ typedef struct transaction_s
     llist_t *outputs;
 } transaction_t;
 
-#define EC_PUB_LEN 65
 
 /* Function prototypes */
 
