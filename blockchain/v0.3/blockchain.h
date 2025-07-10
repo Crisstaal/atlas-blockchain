@@ -36,7 +36,7 @@ typedef struct block_s
     block_info_t info;
     block_data_t data;
     uint8_t hash[SHA256_DIGEST_LENGTH];
-    llist_t *transactions;   // List of transaction_t *
+   transaction_t *transactions;
 } block_t;
 
 typedef struct blockchain_s
