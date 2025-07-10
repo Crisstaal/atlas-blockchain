@@ -1,5 +1,6 @@
 #include "blockchain.h"
 #include "hblk_crypto.h"
+#include "transaction.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
