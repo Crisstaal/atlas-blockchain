@@ -57,6 +57,7 @@ typedef struct block_s
 	block_info_t info;
 	block_data_t data;
 	uint8_t hash[SHA256_DIGEST_LENGTH];
+	llist_t *transactions;
 } block_t;
 
 /**
@@ -90,7 +91,6 @@ void block_destroy(block_t *block);
 
 uint8_t *block_hash(block_t const *block,
 		    uint8_t hash_buf[SHA256_DIGEST_LENGTH]);
-int block_is_valid(block_t const *block, block_t const *prev_block);
 int hash_matches_difficulty(uint8_t const hash[SHA256_DIGEST_LENGTH],
 			    uint32_t difficulty);
 void block_mine(block_t *block);
