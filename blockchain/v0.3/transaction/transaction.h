@@ -73,6 +73,8 @@ typedef struct transaction_s
     llist_t *outputs;
 } transaction_t;
 
+#define EC_PUB_LEN 65
+
 /* Function prototypes */
 
 unspent_tx_out_t *unspent_tx_out_create(
