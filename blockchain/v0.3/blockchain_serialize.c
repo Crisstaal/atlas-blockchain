@@ -1,187 +1,127 @@
 #include "blockchain.h"
-#include <stdio.h>
+#include "transaction.h"
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <arpa/inet.h>
+#include <fcntl.h>
 
-#define HBLK_MAGIC "HBLK"
-#define HBLK_VERSION "0.3"
-
-static int write_bytes(FILE *f, void *ptr, size_t size)
+/**
+ * write_transaction - writes a transaction to a file descriptor
+ * @fd: file descriptor
+ * @transaction: pointer to transaction to write
+ *
+ * Return: 1 on success, 0 on failure
+ */
+static int write_transaction(int fd, transaction_t const *transaction)
 {
-	return fwrite(ptr, size, 1, f) == 1 ? 0 : -1;
-}
+	int i, nb_inputs, nb_outputs;
 
-static int write_uint32(FILE *f, uint32_t val)
-{
-	uint32_t net_val = htonl(val);
-	return write_bytes(f, &net_val, sizeof(net_val));
-}
+	if (!transaction)
+		return (0);
 
-static int write_uint64(FILE *f, uint64_t val)
-{
-	uint64_t net_val = htobe64(val);
-	return write_bytes(f, &net_val, sizeof(net_val));
-}
+	if (write(fd, transaction->id, sizeof(transaction->id)) != sizeof(transaction->id))
+		return (0);
 
-static int serialize_tx_in(FILE *f, tx_in_t *in)
-{
-	if (!in)
-		return -1;
+	nb_inputs = llist_size(transaction->inputs);
+	if (write(fd, &nb_inputs, sizeof(int)) != sizeof(int))
+		return (0);
 
-	if (fwrite(in->block_hash, 1, SHA256_DIGEST_LENGTH, f) != SHA256_DIGEST_LENGTH ||
-	    fwrite(in->tx_id, 1, SHA256_DIGEST_LENGTH, f) != SHA256_DIGEST_LENGTH ||
-	    fwrite(in->tx_out_hash, 1, SHA256_DIGEST_LENGTH, f) != SHA256_DIGEST_LENGTH ||
-	    fwrite(in->sig.sig, 1, sizeof(in->sig.sig), f) != sizeof(in->sig.sig) ||
-	    fwrite(&in->sig.len, 1, 1, f) != 1)
-		return -1;
-
-	return 0;
-}
-
-static int serialize_tx_out(FILE *f, tx_out_t *out)
-{
-	if (!out)
-		return -1;
-
-	if (write_uint32(f, out->amount) < 0 ||
-	    fwrite(out->pub, 1, EC_PUB_LEN, f) != EC_PUB_LEN ||
-	    fwrite(out->hash, 1, SHA256_DIGEST_LENGTH, f) != SHA256_DIGEST_LENGTH)
-		return -1;
-
-	return 0;
-}
-
-static int serialize_transaction(FILE *f, transaction_t *tx)
-{
-	uint32_t n_inputs, n_outputs;
-	size_t i;
-
-	if (!tx || !f)
-		return -1;
-
-	if (fwrite(tx->id, 1, SHA256_DIGEST_LENGTH, f) != SHA256_DIGEST_LENGTH)
-		return -1;
-
-	n_inputs = llist_size(tx->inputs);
-	n_outputs = llist_size(tx->outputs);
-
-	if (write_uint32(f, n_inputs) < 0 || write_uint32(f, n_outputs) < 0)
-		return -1;
-
-	for (i = 0; i < n_inputs; i++)
+	for (i = 0; i < nb_inputs; i++)
 	{
-		tx_in_t *in = llist_get_node_at(tx->inputs, i);
-		if (serialize_tx_in(f, in) < 0)
-			return -1;
+		tx_in_t *in = llist_get_node_at(transaction->inputs, i);
+		if (!in || write(fd, in, sizeof(*in)) != sizeof(*in))
+			return (0);
 	}
 
-	for (i = 0; i < n_outputs; i++)
+	nb_outputs = llist_size(transaction->outputs);
+	if (write(fd, &nb_outputs, sizeof(int)) != sizeof(int))
+		return (0);
+
+	for (i = 0; i < nb_outputs; i++)
 	{
-		tx_out_t *out = llist_get_node_at(tx->outputs, i);
-		if (serialize_tx_out(f, out) < 0)
-			return -1;
+		tx_out_t *out = llist_get_node_at(transaction->outputs, i);
+		if (!out || write(fd, out, sizeof(*out)) != sizeof(*out))
+			return (0);
 	}
 
-	return 0;
+	return (1);
 }
 
-static int serialize_block(FILE *f, block_t *block)
+/**
+ * serialize_block - writes a single block and its transactions to file
+ * @fd: file descriptor
+ * @block: pointer to block
+ *
+ * Return: 1 on success, 0 on failure
+ */
+static int serialize_block(int fd, block_t const *block)
 {
-	uint32_t nb_tx;
-	size_t i;
+	int i, nb_tx;
 
-	if (!block || !f)
-		return -1;
+	if (write(fd, &block->info, sizeof(block_info_t)) != sizeof(block_info_t))
+		return (0);
 
-	if (write_uint32(f, block->info.index) < 0 ||
-	    write_uint32(f, block->info.difficulty) < 0 ||
-	    write_uint64(f, block->info.timestamp) < 0 ||
-	    write_uint64(f, block->info.nonce) < 0 ||
-	    fwrite(block->info.prev_hash, 1, SHA256_DIGEST_LENGTH, f) != SHA256_DIGEST_LENGTH ||
-	    write_uint32(f, block->data.len) < 0 ||
-	    fwrite(block->data.buffer, 1, block->data.len, f) != block->data.len ||
-	    fwrite(block->hash, 1, SHA256_DIGEST_LENGTH, f) != SHA256_DIGEST_LENGTH)
-		return -1;
+	if (write(fd, &block->data.len, sizeof(uint32_t)) != sizeof(uint32_t))
+		return (0);
 
-	if (block->transactions == NULL)
-		return write_uint32(f, -1);
+	if (write(fd, block->data.buffer, block->data.len) != (ssize_t)block->data.len)
+		return (0);
+
+	if (write(fd, block->hash, SHA256_DIGEST_LENGTH) != SHA256_DIGEST_LENGTH)
+		return (0);
 
 	nb_tx = llist_size(block->transactions);
-	if (write_uint32(f, nb_tx) < 0)
-		return -1;
+	if (write(fd, &nb_tx, sizeof(int)) != sizeof(int))
+		return (0);
 
 	for (i = 0; i < nb_tx; i++)
 	{
 		transaction_t *tx = llist_get_node_at(block->transactions, i);
-		if (serialize_transaction(f, tx) < 0)
-			return -1;
+		if (!write_transaction(fd, tx))
+			return (0);
 	}
 
-	return 0;
+	return (1);
 }
 
-static int serialize_unspent(FILE *f, unspent_tx_out_t *utxo)
+/**
+ * blockchain_serialize - serializes a blockchain into a file
+ * @path: path to output file
+ * @blockchain: pointer to blockchain to serialize
+ *
+ * Return: 1 on success, 0 on failure
+ */
+int blockchain_serialize(char const *path, blockchain_t const *blockchain)
 {
-	if (!utxo)
-		return -1;
+	int fd, i, nb_blocks;
+	const uint8_t magic[4] = {'H', 'B', 'L', 'K'};
+	const uint8_t version[3] = {'0', '.', '3'};
+	uint8_t endianness = _get_endianness();
 
-	if (fwrite(utxo->block_hash, 1, SHA256_DIGEST_LENGTH, f) != SHA256_DIGEST_LENGTH ||
-	    fwrite(utxo->tx_id, 1, SHA256_DIGEST_LENGTH, f) != SHA256_DIGEST_LENGTH ||
-	    write_uint32(f, utxo->out.amount) < 0 ||
-	    fwrite(utxo->out.pub, 1, EC_PUB_LEN, f) != EC_PUB_LEN ||
-	    fwrite(utxo->out.hash, 1, SHA256_DIGEST_LENGTH, f) != SHA256_DIGEST_LENGTH)
-		return -1;
+	if (!path || !blockchain)
+		return (0);
 
-	return 0;
-}
+	fd = open(path, O_CREAT | O_WRONLY | O_TRUNC, 0600);
+	if (fd < 0)
+		return (0);
 
-int blockchain_serialize(blockchain_t const *blockchain, char const *path)
-{
-	FILE *f;
-	uint32_t n_blocks, n_unspent;
-	size_t i;
+	write(fd, magic, 4);
+	write(fd, version, 3);
+	write(fd, &endianness, 1);
 
-	if (!blockchain || !path)
-		return -1;
+	nb_blocks = llist_size(blockchain->chain);
+	write(fd, &nb_blocks, sizeof(uint32_t));
 
-	f = fopen(path, "wb");
-	if (!f)
-		return -1;
-
-	fwrite(HBLK_MAGIC, 1, 4, f);
-	fwrite(HBLK_VERSION, 1, 3, f);
-	fputc(1, f); /* Little endian */
-
-	n_blocks = llist_size(blockchain->chain);
-	n_unspent = llist_size(blockchain->unspent);
-
-	if (write_uint32(f, n_blocks) < 0 || write_uint32(f, n_unspent) < 0)
+	for (i = 0; i < nb_blocks; i++)
 	{
-		fclose(f);
-		return -1;
-	}
-
-	for (i = 0; i < n_blocks; i++)
-	{
-		block_t *blk = llist_get_node_at(blockchain->chain, i);
-		if (serialize_block(f, blk) < 0)
+		block_t *block = llist_get_node_at(blockchain->chain, i);
+		if (!serialize_block(fd, block))
 		{
-			fclose(f);
-			return -1;
+			close(fd);
+			return (0);
 		}
 	}
 
-	for (i = 0; i < n_unspent; i++)
-	{
-		unspent_tx_out_t *utxo = llist_get_node_at(blockchain->unspent, i);
-		if (serialize_unspent(f, utxo) < 0)
-		{
-			fclose(f);
-			return -1;
-		}
-	}
-
-	fclose(f);
-	return 0;
+	close(fd);
+	return (1);
 }
