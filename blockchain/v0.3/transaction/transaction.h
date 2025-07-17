@@ -1,17 +1,14 @@
 #ifndef TRANSACTION_H
 #define TRANSACTION_H
 
-#include "blockchain.h"
-#include "hblk_crypto.h" 
 #include <stddef.h>
 #include <stdint.h>
 #include <openssl/ec.h>
 #include <openssl/sha.h>
 
 #include "llist.h"
-
-typedef struct blockchain_s blockchain_t;
-
+#include "blockchain.h"	 /* for tx_in_t, tx_out_t, unspent_tx_out_t */
+#include "hblk_crypto.h" /* for EC_PUB_LEN, sig_t */
 
 /**
  * struct transaction_s - Full transaction structure
@@ -22,9 +19,9 @@ typedef struct blockchain_s blockchain_t;
  */
 typedef struct transaction_s
 {
-    uint8_t id[SHA256_DIGEST_LENGTH];
-    llist_t *inputs;
-    llist_t *outputs;
+	uint8_t id[SHA256_DIGEST_LENGTH];
+	llist_t *inputs;
+	llist_t *outputs;
 } transaction_t;
 
 /* Function prototypes */
@@ -38,7 +35,6 @@ int transaction_is_valid(transaction_t const *transaction, llist_t *all_unspent)
 transaction_t *coinbase_create(EC_KEY const *receiver, uint32_t block_index);
 int coinbase_is_valid(transaction_t const *coinbase, uint32_t block_index);
 void transaction_destroy(transaction_t *transaction);
-
 llist_t *update_unspent(llist_t *transactions, uint8_t block_hash[SHA256_DIGEST_LENGTH], llist_t *all_unspent);
 
 #endif /* TRANSACTION_H */
