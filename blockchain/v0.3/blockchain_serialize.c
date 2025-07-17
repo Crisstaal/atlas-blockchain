@@ -7,6 +7,7 @@
 #include <unistd.h>  /* for close() */
 #include <fcntl.h>   /* for open() */
 #include <errno.h>
+#include "llist.h"
 
 #define HBLK_MAGIC "HBLK"
 #define HBLK_VERSION "0.3"
