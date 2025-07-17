@@ -17,7 +17,6 @@
 
 /* Forward declare transaction_t */
 typedef struct transaction_s transaction_t;
-uint8_t _get_endianness(void);
 
 /* === Structures === */
 

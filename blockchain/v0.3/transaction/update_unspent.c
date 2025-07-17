@@ -3,10 +3,18 @@
 #include <stdlib.h>
 #include <string.h>
 
+/**
+ * match_unspent_by_idx - Helper to match unspent output by its index
+ * @node_data: Pointer to unspent_tx_out_t
+ * @arg: Pointer to uint32_t index to match
+ *
+ * Return: 1 if matches, 0 otherwise
+ */
 static int match_unspent_by_idx(void *node_data, void *arg)
 {
 	unspent_tx_out_t *uto = node_data;
 	uint32_t idx = *(uint32_t *)arg;
+
 	return (uto->out.idx == idx);
 }
 
@@ -68,7 +76,7 @@ llist_t *update_unspent(llist_t *transactions,
 				continue;
 
 			uint32_t idx_to_remove = tx_in->tx_out_idx;
-			llist_remove_node(new_unspent, match_unspent_by_idx, &idx_to_remove, free);
+			llist_remove_node(new_unspent, match_unspent_by_idx, &idx_to_remove, 1, free);
 		}
 
 		/* Add outputs as new unspent */
@@ -92,6 +100,7 @@ llist_t *update_unspent(llist_t *transactions,
 		}
 	}
 
+	/* Destroy old unspent list */
 	llist_destroy(all_unspent, 1, free);
 
 	return (new_unspent);
