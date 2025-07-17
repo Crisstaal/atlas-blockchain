@@ -1,5 +1,10 @@
 #include "transaction.h"
-
+#include "blockchain.h"
+#include "crypto/hblk_crypto.h"
+#include "llist.h"
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 #define SIG_MAX_LEN 72
 
