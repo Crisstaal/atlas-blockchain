@@ -1,3 +1,4 @@
+#include <string.h>
 #include "transaction.h"
 
 /**
@@ -22,7 +23,7 @@ int transaction_is_valid(transaction_t const *transaction, llist_t *all_unspent)
 
 	/* Verify transaction hash matches */
 	if (!transaction_hash(transaction, hash) ||
-	    memcmp(hash, transaction->id, SHA256_DIGEST_LENGTH) != 0)
+	    memcmp(hash, transaction->id, (size_t)SHA256_DIGEST_LENGTH) != 0)
 		return (0);
 
 	/* Validate each input */
@@ -38,9 +39,9 @@ int transaction_is_valid(transaction_t const *transaction, llist_t *all_unspent)
 			if (!unspent)
 				continue;
 
-			if (memcmp(in->block_hash, unspent->block_hash, SHA256_DIGEST_LENGTH) == 0 &&
-			    memcmp(in->tx_id, unspent->tx_id, SHA256_DIGEST_LENGTH) == 0 &&
-			    memcmp(in->tx_out_hash, unspent->out.hash, SHA256_DIGEST_LENGTH) == 0)
+			if (memcmp(in->block_hash, unspent->block_hash, (size_t)SHA256_DIGEST_LENGTH) == 0 &&
+			    memcmp(in->tx_id, unspent->tx_id, (size_t)SHA256_DIGEST_LENGTH) == 0 &&
+			    memcmp(in->tx_out_hash, unspent->out.hash, (size_t)SHA256_DIGEST_LENGTH) == 0)
 				break;
 			unspent = NULL;
 		}
@@ -50,7 +51,7 @@ int transaction_is_valid(transaction_t const *transaction, llist_t *all_unspent)
 
 		/* Verify signature */
 		pub_key = ec_from_pub(unspent->out.pub);
-		if (!pub_key || !ec_verify(pub_key, transaction->id, SHA256_DIGEST_LENGTH, &in->sig))
+		if (!pub_key || !ec_verify(pub_key, transaction->id, (size_t)SHA256_DIGEST_LENGTH, &in->sig))
 		{
 			EC_KEY_free(pub_key);
 			return (0);
