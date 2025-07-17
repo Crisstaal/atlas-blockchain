@@ -1,13 +1,13 @@
 #include "blockchain.h"
-#include "hblk_crypto.h"
+#include "llist.h"
 #include "transaction.h"
+#include "hblk_crypto.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>  /* for close() */
 #include <fcntl.h>   /* for open() */
 #include <errno.h>
-#include "llist.h"
 
 #define HBLK_MAGIC "HBLK"
 #define HBLK_VERSION "0.3"
