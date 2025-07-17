@@ -1,24 +1,20 @@
 #include "blockchain.h"
-#include "transaction.h"
 #include <stdlib.h>
-
-extern block_t _genesis; 
+#include "transaction.h"
 
 /**
- * blockchain_destroy - Frees a Blockchain structure
- * @blockchain: pointer to the blockchain to destroy
+ * block_destroy - Frees all memory associated with a block,
+ *                 including its transactions list
+ * @block: Pointer to the block to destroy
  */
-void blockchain_destroy(blockchain_t *blockchain)
+void block_destroy(block_t *block)
 {
-	if (!blockchain)
-		return;
+    if (!block)
+        return;
 
-	if (blockchain->chain)
-		llist_destroy(blockchain->chain, 1, (node_dtor_t)block_destroy);
+    /* Destroy the transactions list and free each transaction */
+    if (block->transactions)
+        llist_destroy(block->transactions, 1, (void (*)(void *))transaction_destroy);
 
-	/* NEW: Destroy unspent list */
-	if (blockchain->unspent)
-		llist_destroy(blockchain->unspent, 1, free);
-
-	free(blockchain);
+    free(block);
 }

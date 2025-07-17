@@ -3,6 +3,7 @@ CFLAGS = -Wall -Wextra -Werror -pedantic -g3 -I. -Itransaction -Iprovided -I../.
 AR = ar
 ARFLAGS = rcs
 
+# Use wildcard to find all .c files automatically (optional)
 SRC = \
 	blockchain_create.c \
 	block_create.c \
@@ -36,6 +37,7 @@ all: libhblk_blockchain.a
 libhblk_blockchain.a: $(OBJ)
 	$(AR) $(ARFLAGS) $@ $^
 
+# Compile rule - handles subdirectories as well
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
