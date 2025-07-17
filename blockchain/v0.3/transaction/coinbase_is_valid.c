@@ -1,6 +1,11 @@
 #include "transaction.h"
 #include "crypto/hblk_crypto.h"
 #include <string.h>
+
+#ifndef SIG_MAX_LEN
+#define SIG_MAX_LEN 72
+#endif
+
 /**
  * coinbase_is_valid - validates a coinbase transaction
  * @coinbase: pointer to the coinbase transaction
