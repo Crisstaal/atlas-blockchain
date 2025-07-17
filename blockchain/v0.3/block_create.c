@@ -55,8 +55,11 @@ blockchain_t *blockchain_create(void)
 
 	/* Add the genesis coinbase UTXO */
 	transaction_t *coinbase = coinbase_create(NULL, 0);
+	tx_out_t *first_output = llist_get_node_at(coinbase->outputs, 0);
+
 	unspent_tx_out_t *utxo = unspent_tx_out_create(genesis->hash,
-		coinbase->id, &coinbase->outputs[0]);
+    coinbase->id, first_output);
+
 	llist_add_node(blockchain->unspent, utxo, ADD_NODE_REAR);
 	transaction_destroy(coinbase);
 
