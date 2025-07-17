@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <openssl/ec.h>
 #include <openssl/sha.h>
+#include "blockchain.h"
 
 #include "llist.h"
 
