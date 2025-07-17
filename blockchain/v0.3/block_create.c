@@ -1,7 +1,9 @@
 #include "blockchain.h"
 #include <stdlib.h>
 #include <string.h>
+#include "transaction.h"
 
+extern block_t _genesis;
 /**
  * blockchain_create - Creates a Blockchain structure, with Genesis Block
  * Return: pointer to the created blockchain, or NULL on failure
