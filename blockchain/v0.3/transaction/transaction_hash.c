@@ -1,7 +1,6 @@
 #include "transaction.h"
 #include <stdlib.h>
 #include <string.h>
-#include "blockchain.h"
 
 /**
  * transaction_hash - computes transaction ID (SHA-256 hash)

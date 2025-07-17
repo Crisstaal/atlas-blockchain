@@ -31,6 +31,34 @@ typedef struct transaction_s
     llist_t *outputs;
 } transaction_t;
 
+/**
+ * struct tx_in_s - transaction input
+ * @block_hash: hash of the block containing the referenced output
+ * @tx_id: hash of the transaction containing the referenced output
+ * @tx_out_hash: hash of the referenced output
+ * @sig: signature of the transaction
+ */
+typedef struct tx_in_s
+{
+    uint8_t block_hash[SHA256_DIGEST_LENGTH];
+    uint8_t tx_id[SHA256_DIGEST_LENGTH];
+    uint8_t tx_out_hash[SHA256_DIGEST_LENGTH];
+    sig_t sig;
+} tx_in_t;
+
+/**
+ * struct tx_out_s - transaction output
+ * @amount: amount from transaction
+ * @pub: recipient's public key
+ * @hash: hash of this output (for reference)
+ */
+typedef struct tx_out_s
+{
+    uint32_t amount;
+    uint8_t pub[EC_PUB_LEN];
+    uint8_t hash[SHA256_DIGEST_LENGTH];
+} tx_out_t;
+
 
 /* Function prototypes */
 
