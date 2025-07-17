@@ -1,6 +1,7 @@
 #include "transaction.h"
 
 #include <string.h>
+#define SIG_MAX_LEN 72
 
 /**
  * transaction_create - Creates a new transaction
