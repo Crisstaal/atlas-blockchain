@@ -1,74 +1,65 @@
 #include "transaction.h"
+#include <stdlib.h>
 #include <string.h>
 
 /**
- * transaction_hash - Computes the transaction ID (hash)
- * @transaction: pointer to transaction to hash
- * @hash_buf: buffer to store the computed hash
+ * transaction_hash - Computes the ID (SHA-256 hash) of a transaction.
+ * @transaction: Pointer to the transaction to hash.
+ * @hash_buf: Buffer to store the resulting hash (32 bytes).
  *
- * Return: pointer to hash_buf, or NULL on failure
+ * Return: Pointer to hash_buf or NULL on error.
  */
-uint8_t *transaction_hash(const transaction_t *transaction,
+uint8_t *transaction_hash(transaction_t const *transaction,
 			  uint8_t hash_buf[SHA256_DIGEST_LENGTH])
 {
-	size_t i, buffer_len, num_inputs, num_outputs;
-	uint8_t *buffer = NULL, *cursor;
-	tx_in_t *in;
-	tx_out_t *out;
+	size_t input_count, output_count, i;
+	size_t buffer_size;
+	uint8_t *buffer, *ptr;
 
 	if (!transaction || !hash_buf)
 		return (NULL);
 
-	num_inputs = llist_size(transaction->inputs);
-	num_outputs = llist_size(transaction->outputs);
+	input_count = llist_size(transaction->inputs);
+	output_count = llist_size(transaction->outputs);
+	buffer_size = input_count * (SHA256_DIGEST_LENGTH * 3) +
+		      output_count * SHA256_DIGEST_LENGTH;
 
-	/* Defensive check for llist_size failure (-1 cast to size_t = huge number) */
-	if (num_inputs == (size_t)-1 || num_outputs == (size_t)-1)
-		return (NULL);
-
-	buffer_len = num_inputs * 3 * SHA256_DIGEST_LENGTH +
-		     num_outputs * SHA256_DIGEST_LENGTH;
-
-	buffer = calloc(1, buffer_len);
+	buffer = calloc(1, buffer_size);
 	if (!buffer)
 		return (NULL);
 
-	cursor = buffer;
+	ptr = buffer;
 
-	/* Append all input hashes */
-	for (i = 0; i < num_inputs; i++)
+	/* Add inputs: block_hash, tx_id, tx_out_hash */
+	for (i = 0; i < input_count; i++)
 	{
-		in = llist_get_node_at(transaction->inputs, i);
+		tx_in_t *in = llist_get_node_at(transaction->inputs, i);
+
 		if (!in)
-			goto cleanup;
-
-		memcpy(cursor, in->block_hash, SHA256_DIGEST_LENGTH);
-		cursor += SHA256_DIGEST_LENGTH;
-
-		memcpy(cursor, in->tx_id, SHA256_DIGEST_LENGTH);
-		cursor += SHA256_DIGEST_LENGTH;
-
-		memcpy(cursor, in->tx_out_hash, SHA256_DIGEST_LENGTH);
-		cursor += SHA256_DIGEST_LENGTH;
+			goto clean;
+		memcpy(ptr, in->block_hash, SHA256_DIGEST_LENGTH), ptr += SHA256_DIGEST_LENGTH;
+		memcpy(ptr, in->tx_id, SHA256_DIGEST_LENGTH), ptr += SHA256_DIGEST_LENGTH;
+		memcpy(ptr, in->tx_out_hash, SHA256_DIGEST_LENGTH), ptr += SHA256_DIGEST_LENGTH;
 	}
 
-	/* Append all output hashes */
-	for (i = 0; i < num_outputs; i++)
+	/* Add outputs: hash */
+	for (i = 0; i < output_count; i++)
 	{
-		out = llist_get_node_at(transaction->outputs, i);
-		if (!out)
-			goto cleanup;
+		tx_out_t *out = llist_get_node_at(transaction->outputs, i);
 
-		memcpy(cursor, out->hash, SHA256_DIGEST_LENGTH);
-		cursor += SHA256_DIGEST_LENGTH;
+		if (!out)
+			goto clean;
+		memcpy(ptr, out->hash, SHA256_DIGEST_LENGTH), ptr += SHA256_DIGEST_LENGTH;
 	}
 
 	/* Compute the hash */
-	sha256((const int8_t *)buffer, buffer_len, hash_buf);
+	if (!sha256(buffer, buffer_size, hash_buf))
+		goto clean;
+
 	free(buffer);
 	return (hash_buf);
 
-cleanup:
+clean:
 	free(buffer);
 	return (NULL);
 }
