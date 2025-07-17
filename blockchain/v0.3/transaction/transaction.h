@@ -2,7 +2,7 @@
 #define TRANSACTION_H
 
 #include "blockchain.h"
-#include "crypto/hblk_crypto.h" 
+#include "hblk_crypto.h" 
 #include <stddef.h>
 #include <stdint.h>
 #include <openssl/ec.h>
