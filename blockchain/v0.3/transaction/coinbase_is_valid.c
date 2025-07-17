@@ -1,5 +1,6 @@
 #include "transaction.h"
-
+#include "crypto/hblk_crypto.h"
+#include <string.h>
 /**
  * coinbase_is_valid - validates a coinbase transaction
  * @coinbase: pointer to the coinbase transaction
