@@ -1,7 +1,9 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -pedantic -Wno-deprecated-declarations -I.
-LDFLAGS = -lllist -lssl -lcrypto -pthread
+CFLAGS = -Wall -Wextra -Werror -pedantic -g3 -I. -Itransaction -Iprovided -I../../crypto
+AR = ar
+ARFLAGS = rcs
 
+# Use wildcard to find all .c files automatically (optional)
 SRC = \
 	blockchain_create.c \
 	block_create.c \
@@ -11,23 +13,38 @@ SRC = \
 	blockchain_serialize.c \
 	blockchain_deserialize.c \
 	block_is_valid.c \
+	hash_matches_difficulty.c \
+	blockchain_difficulty.c \
 	block_mine.c \
-	hash_matches_difficulty.c
+	transaction/tx_out_create.c \
+	transaction/unspent_tx_out_create.c \
+	transaction/tx_in_create.c \
+	transaction/transaction_hash.c \
+	transaction/tx_in_sign.c \
+	transaction/transaction_create.c \
+	transaction/transaction_is_valid.c \
+	transaction/coinbase_create.c \
+	transaction/coinbase_is_valid.c \
+	transaction/transaction_destroy.c \
+	transaction/update_unspent.c
 
-OBJS = $(SRC:.c=.o)
-TARGET = libhblk_blockchain_v0.2.a
+OBJ = $(SRC:.c=.o)
 
 .PHONY: all clean fclean re
 
-all: $(TARGET)
+all: libhblk_blockchain.a
 
-$(TARGET): $(OBJS)
-	ar rcs $@ $^
+libhblk_blockchain.a: $(OBJ)
+	$(AR) $(ARFLAGS) $@ $^
+
+# Compile rule - handles subdirectories as well
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJS)
+	rm -f $(OBJ)
 
 fclean: clean
-	rm -f $(TARGET)
+	rm -f libhblk_blockchain.a
 
 re: fclean all
