@@ -1,5 +1,8 @@
 #include "blockchain.h"
+#include "transaction.h"
 #include <stdlib.h>
+
+extern block_t _genesis; 
 
 /**
  * blockchain_destroy - Frees a Blockchain structure
