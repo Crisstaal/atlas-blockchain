@@ -5,6 +5,12 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+static uint8_t _get_endianness(void)
+{
+	uint16_t n = 1;
+	return (*(uint8_t *)&n == 1) ? 1 : 2;
+}
+
 /**
  * write_transaction - writes a transaction to a file descriptor
  * @fd: file descriptor
@@ -86,17 +92,18 @@ static int serialize_block(int fd, block_t const *block)
 
 /**
  * blockchain_serialize - serializes a blockchain into a file
- * @path: path to output file
  * @blockchain: pointer to blockchain to serialize
+ * @path: path to output file
  *
  * Return: 1 on success, 0 on failure
  */
-int blockchain_serialize(char const *path, blockchain_t const *blockchain)
+int blockchain_serialize(blockchain_t const *blockchain, char const *path)
 {
-	int fd, i, nb_blocks;
+	int fd, i;
+	uint32_t nb_blocks;
 	const uint8_t magic[4] = {'H', 'B', 'L', 'K'};
 	const uint8_t version[3] = {'0', '.', '3'};
-	uint8_t endianness = _get_endianness();
+	uint8_t endianness;
 
 	if (!path || !blockchain)
 		return (0);
@@ -105,14 +112,24 @@ int blockchain_serialize(char const *path, blockchain_t const *blockchain)
 	if (fd < 0)
 		return (0);
 
-	write(fd, magic, 4);
-	write(fd, version, 3);
-	write(fd, &endianness, 1);
+	endianness = _get_endianness();
 
-	nb_blocks = llist_size(blockchain->chain);
-	write(fd, &nb_blocks, sizeof(uint32_t));
+	if (write(fd, magic, 4) != 4 ||
+	    write(fd, version, 3) != 3 ||
+	    write(fd, &endianness, 1) != 1)
+	{
+		close(fd);
+		return (0);
+	}
 
-	for (i = 0; i < nb_blocks; i++)
+	nb_blocks = (uint32_t)llist_size(blockchain->chain);
+	if (write(fd, &nb_blocks, sizeof(nb_blocks)) != sizeof(nb_blocks))
+	{
+		close(fd);
+		return (0);
+	}
+
+	for (i = 0; i < (int)nb_blocks; i++)
 	{
 		block_t *block = llist_get_node_at(blockchain->chain, i);
 		if (!serialize_block(fd, block))

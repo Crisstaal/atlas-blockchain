@@ -17,24 +17,24 @@
 
 /* Forward declare transaction_t */
 typedef struct transaction_s transaction_t;
+uint8_t _get_endianness(void);
 
 /* === Structures === */
 
 typedef struct block_info_s
 {
-    uint32_t index;
-    uint32_t difficulty;
-    uint64_t timestamp;
-    uint64_t nonce;
-    uint8_t prev_hash[SHA256_DIGEST_LENGTH];
+	uint32_t index;
+	uint32_t difficulty;
+	uint64_t timestamp;
+	uint64_t nonce;
+	uint8_t prev_hash[SHA256_DIGEST_LENGTH];
 } block_info_t;
 
 typedef struct block_data_s
 {
-    int8_t buffer[BLOCKCHAIN_DATA_MAX];
-    uint32_t len;
+	int8_t buffer[BLOCKCHAIN_DATA_MAX];
+	uint32_t len;
 } block_data_t;
-
 
 /**
  * struct tx_in_s - Transaction input structure
@@ -46,10 +46,11 @@ typedef struct block_data_s
  */
 typedef struct tx_in_s
 {
-    uint8_t block_hash[SHA256_DIGEST_LENGTH];
-    uint8_t tx_id[SHA256_DIGEST_LENGTH];
-    uint8_t tx_out_hash[SHA256_DIGEST_LENGTH];
-    sig_t sig;
+	uint8_t block_hash[SHA256_DIGEST_LENGTH];
+	uint8_t tx_id[SHA256_DIGEST_LENGTH];
+	uint8_t tx_out_hash[SHA256_DIGEST_LENGTH];
+	sig_t sig;
+	uint32_t tx_out_idx;
 } tx_in_t;
 
 /**
@@ -61,9 +62,11 @@ typedef struct tx_in_s
  */
 typedef struct tx_out_s
 {
-    uint32_t amount;
-    uint8_t pub[EC_PUB_LEN];
-    uint8_t hash[SHA256_DIGEST_LENGTH];
+	uint32_t amount;
+	uint8_t pub[EC_PUB_LEN];
+	uint8_t hash[SHA256_DIGEST_LENGTH];
+
+	uint32_t idx;
 } tx_out_t;
 
 /**
@@ -75,24 +78,23 @@ typedef struct tx_out_s
  */
 typedef struct unspent_tx_out_s
 {
-    uint8_t block_hash[SHA256_DIGEST_LENGTH];
-    uint8_t tx_id[SHA256_DIGEST_LENGTH];
-    tx_out_t out;
+	uint8_t block_hash[SHA256_DIGEST_LENGTH];
+	uint8_t tx_id[SHA256_DIGEST_LENGTH];
+	tx_out_t out;
 } unspent_tx_out_t;
-
 
 typedef struct block_s
 {
-    block_info_t info;
-    block_data_t data;
-    llist_t *transactions;  /* list of transaction_t * */
-    uint8_t hash[SHA256_DIGEST_LENGTH];
+	block_info_t info;
+	block_data_t data;
+	llist_t *transactions; /* list of transaction_t * */
+	uint8_t hash[SHA256_DIGEST_LENGTH];
 } block_t;
 
 typedef struct blockchain_s
 {
-    llist_t *chain;    /* List of block_t * */
-    llist_t *unspent;  /* List of unspent_tx_out_t * */
+	llist_t *chain;	  /* List of block_t * */
+	llist_t *unspent; /* List of unspent_tx_out_t * */
 } blockchain_t;
 
 /* === Blockchain functions === */
@@ -104,16 +106,16 @@ blockchain_t *blockchain_deserialize(char const *path);
 uint32_t blockchain_difficulty(blockchain_t const *blockchain);
 
 block_t *block_create(block_t const *prev,
-                      int8_t const *data, uint32_t data_len);
+		      int8_t const *data, uint32_t data_len);
 void block_destroy(block_t *block);
 uint8_t *block_hash(block_t const *block,
-                    uint8_t hash_buf[SHA256_DIGEST_LENGTH]);
+		    uint8_t hash_buf[SHA256_DIGEST_LENGTH]);
 int hash_matches_difficulty(uint8_t const hash[SHA256_DIGEST_LENGTH],
-                            uint32_t difficulty);
+			    uint32_t difficulty);
 void block_mine(block_t *block);
 int block_is_valid(block_t const *block,
-                   block_t const *prev_block,
-                   llist_t *all_unspent);
+		   block_t const *prev_block,
+		   llist_t *all_unspent);
 
 /* === Transaction functions === */
 

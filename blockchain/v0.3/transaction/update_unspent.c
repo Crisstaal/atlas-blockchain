@@ -1,6 +1,14 @@
 #include "blockchain.h"
+#include "transaction.h"
 #include <stdlib.h>
 #include <string.h>
+
+static int match_unspent_by_idx(void *node_data, void *arg)
+{
+	unspent_tx_out_t *uto = node_data;
+	uint32_t idx = *(uint32_t *)arg;
+	return (uto->out.idx == idx);
+}
 
 /**
  * update_unspent - Updates the list of all unspent transaction outputs
@@ -19,7 +27,7 @@ llist_t *update_unspent(llist_t *transactions,
 	tx_out_t *tx_out;
 	tx_in_t *tx_in;
 	unspent_tx_out_t *uto;
-	int i, j, k, num_tx, num_out, num_in;
+	int i, j, num_tx, num_out, num_in;
 
 	if (!transactions || !block_hash || !all_unspent)
 		return (NULL);
@@ -28,8 +36,8 @@ llist_t *update_unspent(llist_t *transactions,
 	if (!new_unspent)
 		return (NULL);
 
-	/* Copy all_unspent into new_unspent, we'll remove inputs next */
-	for (i = 0; i < llist_size(all_unspent); i++)
+	/* Copy all_unspent into new_unspent */
+	for (i = 0; i < (int)llist_size(all_unspent); i++)
 	{
 		unspent_tx_out_t *original = llist_get_node_at(all_unspent, i);
 		if (!original)
@@ -45,7 +53,6 @@ llist_t *update_unspent(llist_t *transactions,
 
 	num_tx = llist_size(transactions);
 
-	/* Loop over each transaction */
 	for (i = 0; i < num_tx; i++)
 	{
 		tx = llist_get_node_at(transactions, i);
@@ -60,23 +67,11 @@ llist_t *update_unspent(llist_t *transactions,
 			if (!tx_in)
 				continue;
 
-			/* Find and remove matching unspent */
-			for (k = 0; k < llist_size(new_unspent); k++)
-			{
-				uto = llist_get_node_at(new_unspent, k);
-				if (!uto)
-					continue;
-
-				if (memcmp(uto->tx_id, tx_in->tx_id, SHA256_DIGEST_LENGTH) == 0 &&
-				    uto->out.idx == tx_in->tx_out_idx)
-				{
-					llist_remove_node(new_unspent, k, free);
-					break;
-				}
-			}
+			uint32_t idx_to_remove = tx_in->tx_out_idx;
+			llist_remove_node(new_unspent, match_unspent_by_idx, &idx_to_remove, free);
 		}
 
-		/* Add outputs as new unspent outputs */
+		/* Add outputs as new unspent */
 		num_out = llist_size(tx->outputs);
 		for (j = 0; j < num_out; j++)
 		{
@@ -97,7 +92,6 @@ llist_t *update_unspent(llist_t *transactions,
 		}
 	}
 
-	/* Delete the old list */
 	llist_destroy(all_unspent, 1, free);
 
 	return (new_unspent);
