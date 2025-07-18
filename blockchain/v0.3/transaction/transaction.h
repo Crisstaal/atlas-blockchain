@@ -7,7 +7,6 @@
 #include <openssl/sha.h>
 
 #include "llist.h"
-#include "blockchain.h"	 /* for tx_in_t, tx_out_t, unspent_tx_out_t */
 #include "hblk_crypto.h" /* for EC_PUB_LEN, sig_t */
 
 /**

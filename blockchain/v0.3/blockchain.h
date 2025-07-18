@@ -1,6 +1,7 @@
 #ifndef BLOCKCHAIN_H
 #define BLOCKCHAIN_H
 
+#include "transaction/transaction.h"
 #include <stdlib.h>
 #include <stdint.h>
 #include <time.h>
