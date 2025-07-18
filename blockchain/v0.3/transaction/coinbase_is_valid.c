@@ -1,5 +1,5 @@
 #include "transaction.h"
-#include "crypto/hblk_crypto.h"
+#include "hblk_crypto.h"
 #include <string.h>
 
 #ifndef SIG_MAX_LEN
