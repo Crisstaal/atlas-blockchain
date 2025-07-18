@@ -9,6 +9,9 @@
 #include "llist.h"
 #include "hblk_crypto.h" /* for EC_PUB_LEN, sig_t */
 
+typedef struct transaction_s transaction_t;
+
+
 /**
  * struct tx_out_s - Transaction output
  *
