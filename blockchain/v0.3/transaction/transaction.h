@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <openssl/ec.h>
 #include <openssl/sha.h>
-#include <blockhain.h"
+#include "blockhain.h"
 #include "llist.h"
 #include "hblk_crypto.h" /* for EC_PUB_LEN, sig_t */
 
