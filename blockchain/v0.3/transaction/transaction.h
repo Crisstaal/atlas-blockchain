@@ -97,6 +97,16 @@ typedef struct transaction_s
 	llist_t *outputs;
 } transaction_t;
 
+/*Transaction functions */
+
+unspent_tx_out_t *unspent_tx_out_create(
+    uint8_t block_hash[SHA256_DIGEST_LENGTH],
+    uint8_t tx_id[SHA256_DIGEST_LENGTH],
+    tx_out_t const *out);
+
+tx_out_t *tx_out_create(uint32_t amount, uint8_t const pub[EC_PUB_LEN]);
+
+
 /* Function prototypes */
 
 tx_out_t *tx_out_create(uint32_t amount, uint8_t const pub[EC_PUB_LEN]);
