@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "transaction.h"
-#include "crypto/hblk_crypto.h"
+#include "hblk_crypto.h"
 
 /**
  * tx_out_create - Creates and initializes a new
