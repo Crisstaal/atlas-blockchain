@@ -16,8 +16,6 @@
 #define EC_PUB_LEN 65
 #define COINBASE_AMOUNT 50
 
-/* Forward declare transaction_t */
-typedef struct transaction_s transaction_t;
 
 /* === Structures === */
 
